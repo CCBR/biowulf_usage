@@ -1,0 +1,60 @@
+---
+title: "Biowulf_usage"
+author: "Vishal Koparde, PhD [CCBR]"
+date: "3/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning = FALSE, message = FALSE)
+```
+
+```{r echo=FALSE}
+rm(list=ls())
+#setwd("~/Desktop/Temp/biowulf_usage/")
+library("ggplot2")
+library("tidyverse")
+library("reshape2")
+library("plotly")
+library("RColorBrewer")
+n <- 101
+qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+
+read_file<-function(filename){
+  d=read.csv(file=filename,header=FALSE,sep="\t")
+  sn=gsub(pattern = ".txt", replacement = "",x=filename)
+  colnames(d)=c("username",paste0("T",sn))
+  y=c("others",sum(d[21:nrow(d),2]))
+  d=rbind(d[1:20,],y)
+  return(d)
+}
+
+fj <- function(x,y) full_join(x,y,by="username")
+
+files=list.files(path = ".",pattern = ".txt")
+files=sort(files)
+# filename=files[1]
+
+usage=list()
+for (i in 1:length(files)){
+  usage[[i]]=read_file(files[i])
+}
+purrr::reduce(usage,fj) -> usagematrix
+usagematrix %>% replace(is.na(.),0) %>% column_to_rownames(var="username")-> usagematrix
+for (i in 1:ncol(usagematrix)){usagematrix[,i]=as.numeric(usagematrix[,i])}
+usagematrix = as.data.frame(as.matrix(usagematrix))
+usagematrix = usagematrix[order(rowSums(usagematrix),decreasing = TRUE),]
+usagematrix %>% rownames_to_column(var="username") -> usagematrix
+usagematrix$username <- reorder(usagematrix$username, rowSums(usagematrix[-1]))
+usagematrix.melt = melt(usagematrix,id="username")
+colnames(usagematrix.melt)=c("username","timestamp","ncpus_in_use")
+```
+
+```{r pressure, echo=FALSE,fig.width=12,fig.height=9,fig.align='center'}
+ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+
+           geom_bar(stat = "identity", col="white")+
+           scale_fill_manual(values=sample(col_vector,100,replace=TRUE))+theme_classic()+
+           theme(axis.text.x = element_blank())
+           )
+```
