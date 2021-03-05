@@ -32,6 +32,38 @@ read_file<-function(filename){
 
 fj <- function(x,y) full_join(x,y,by="username")
 
+hour_conversion<-function(hour){
+  hour=as.integer(hour)
+  ampm="am"
+  if (hour>12){
+    hour=hour-12
+    ampm="pm"
+  }
+  newhour=paste(hour,ampm)
+  return(newhour)
+}
+reformatdate<-function(x){
+  m=list()
+  m[["01"]]="Jan"
+  m[["02"]]="Feb"
+  m[["03"]]="Mar"
+  m[["04"]]="Apr"
+  m[["05"]]="May"
+  m[["06"]]="Jun"
+  m[["07"]]="Jul"
+  m[["08"]]="Aug"
+  m[["09"]]="Sep"
+  m[["10"]]="Oct"
+  m[["11"]]="Nov"
+  m[["12"]]="Dec"
+  
+  month=substr(x,2,3)
+  day=substr(x,4,5)
+  hour=substr(x,8,9)
+  newdate=paste(m[[month]],day,hour_conversion(hour))
+  return(newdate)
+}
+
 files=list.files(path = ".",pattern = ".txt")
 files=sort(files)
 # filename=files[1]
@@ -45,6 +77,7 @@ usagematrix %>% replace(is.na(.),0) %>% column_to_rownames(var="username")-> usa
 for (i in 1:ncol(usagematrix)){usagematrix[,i]=as.numeric(usagematrix[,i])}
 usagematrix = as.data.frame(as.matrix(usagematrix))
 usagematrix = usagematrix[order(rowSums(usagematrix),decreasing = TRUE),]
+colnames(usagematrix) = unlist(lapply(colnames(usagematrix), reformatdate))
 usagematrix %>% rownames_to_column(var="username") -> usagematrix
 usagematrix$username <- reorder(usagematrix$username, rowSums(usagematrix[-1]))
 usagematrix.melt = melt(usagematrix,id="username")
@@ -55,6 +88,6 @@ colnames(usagematrix.melt)=c("username","timestamp","ncpus_in_use")
 ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+
            geom_bar(stat = "identity", col="white")+
            scale_fill_manual(values=sample(col_vector,100,replace=TRUE))+theme_classic()+
-           theme(axis.text.x = element_blank())
+           theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
            )
 ```
