@@ -37,6 +37,8 @@ jobs:
       - name: My first action
         run: ls -alrth
       - name: run the docker
-        run: Rscript -e "rmarkdown::render(input='biowulf_usage.Rmd')"
+        run: |
+          tar xzvf data.tar.gz
+          Rscript -e "rmarkdown::render(input='biowulf_usage.Rmd')"
       - name: ls again
         run: ls -alrth
