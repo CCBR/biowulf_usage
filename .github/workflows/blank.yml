@@ -40,5 +40,12 @@ jobs:
         run: |
           tar xzvf data.tar.gz
           Rscript -e "rmarkdown::render(input='biowulf_usage.Rmd')"
+          cp biowulf_usage.html docs/index.html
       - name: ls again
         run: ls -alrth
+      - name: Update resources
+        uses: test-room-7/action-update-file@v1
+        with:
+          file-path: docs/index.html
+          commit-msg: Update resources
+          github-token: ${{ secrets.GITHUB_TOKEN }}
