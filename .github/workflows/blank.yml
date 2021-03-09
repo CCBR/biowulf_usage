@@ -49,3 +49,4 @@ jobs:
           file-path: docs/index.html
           commit-msg: Update resources
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
