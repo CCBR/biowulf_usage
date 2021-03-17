@@ -17,7 +17,7 @@ library("tidyverse")
 library("reshape2")
 library("plotly")
 library("RColorBrewer")
-n <- 101
+n <- 201
 qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
 col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
 
@@ -89,7 +89,7 @@ everyother_xlabels=levels(usagematrix.melt$timestamp)
 everyother_xlabels[seq(2,length(everyother_xlabels),2)]=""
 ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+
            geom_bar(stat = "identity", col="white")+
-           scale_fill_manual(values=sample(col_vector,100,replace=TRUE))+theme_classic()+
+           scale_fill_manual(values=sample(col_vector,200,replace=TRUE))+theme_classic()+
            theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
            scale_x_discrete(labels = everyother_xlabels)
            )
