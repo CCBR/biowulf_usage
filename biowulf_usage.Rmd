@@ -1,7 +1,7 @@
 ---
 title: "Biowulf_usage"
 author: "Vishal Koparde, PhD [CCBR]"
-date: "3/4/2021"
+date: "March 2021"
 output: html_document
 ---
 
@@ -82,12 +82,49 @@ usagematrix %>% rownames_to_column(var="username") -> usagematrix
 usagematrix$username <- reorder(usagematrix$username, rowSums(usagematrix[-1]))
 usagematrix.melt = melt(usagematrix,id="username")
 colnames(usagematrix.melt)=c("username","timestamp","ncpus_in_use")
+dates=unique(substr(usagematrix.melt$timestamp,1,6))
+users=as.vector(unique(usagematrix.melt$username))
+daily_usage=matrix(ncol = 3, nrow = 0)
+for (j in 1:length(dates)){
+  days_usage=matrix(ncol = 3, nrow = 0)
+  for (i in 1:length(users)){
+    user=users[[i]]
+    date=dates[[j]]
+    mean_ncpus_used=mean(usagematrix.melt[grepl(date,usagematrix.melt$timestamp) & usagematrix.melt$username==user,]$ncpus_in_use)
+    days_usage=rbind(days_usage,c(user,date,mean_ncpus_used))
+  }
+  days_usage=as.data.frame(days_usage)
+  colnames(days_usage)=c("user","date","mean_ncpus_used")
+  days_usage=days_usage[order(days_usage$mean_ncpus_used,decreasing = TRUE),]
+  daily_usage=rbind(daily_usage,days_usage)
+}
+daily_usage=as.data.frame(daily_usage)
+colnames(daily_usage)=c("user","date","mean_ncpus_used")
+x=dcast(data=daily_usage,formula = user~date,value.var = "mean_ncpus_used")
+x$rs=rowSums(x[-1])
+x=x[order(x$rs,decreasing = TRUE),]
+x$rs=NULL
+x.melt=melt(x,id="user")
+daily_usage=x.melt
+colnames(daily_usage)=c("user","date","mean_ncpus_used")
+daily_usage$mean_ncpus_used=as.numeric(daily_usage$mean_ncpus_used)
 ```
-
+##Hourly
 ```{r pressure, echo=FALSE,fig.width=15,fig.height=9,fig.align='center'}
 everyother_xlabels=levels(usagematrix.melt$timestamp)
 everyother_xlabels[seq(2,length(everyother_xlabels),2)]=""
 ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+
+           geom_bar(stat = "identity", col="white")+
+           scale_fill_manual(values=sample(col_vector,200,replace=TRUE))+theme_classic()+
+           theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+           scale_x_discrete(labels = everyother_xlabels)
+           )
+```
+##Daily
+```{r test}
+everyother_xlabels=levels(as.factor(daily_usage$date))
+everyother_xlabels[seq(2,length(everyother_xlabels),2)]=""
+ggplotly(ggplot(daily_usage,aes(x=date,y=mean_ncpus_used,fill=user))+
            geom_bar(stat = "identity", col="white")+
            scale_fill_manual(values=sample(col_vector,200,replace=TRUE))+theme_classic()+
            theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
