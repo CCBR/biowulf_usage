@@ -101,6 +101,7 @@ for (j in 1:length(dates)){
 daily_usage=as.data.frame(daily_usage)
 colnames(daily_usage)=c("user","date","mean_ncpus_used")
 x=dcast(data=daily_usage,formula = user~date,value.var = "mean_ncpus_used")
+for (i in 2:ncol(x)){x[,i]=as.numeric(x[,i])}
 x$rs=rowSums(x[-1])
 x=x[order(x$rs,decreasing = TRUE),]
 x$rs=NULL
@@ -109,17 +110,17 @@ daily_usage=x.melt
 colnames(daily_usage)=c("user","date","mean_ncpus_used")
 daily_usage$mean_ncpus_used=as.numeric(daily_usage$mean_ncpus_used)
 ```
-##Hourly
-```{r pressure, echo=FALSE,fig.width=15,fig.height=9,fig.align='center'}
-everyother_xlabels=levels(usagematrix.melt$timestamp)
-everyother_xlabels[seq(2,length(everyother_xlabels),2)]=""
-ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+
-           geom_bar(stat = "identity", col="white")+
-           scale_fill_manual(values=sample(col_vector,200,replace=TRUE))+theme_classic()+
-           theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
-           scale_x_discrete(labels = everyother_xlabels)
-           )
-```
+<!-- ##Hourly -->
+<!-- ```{r pressure, echo=FALSE,fig.width=15,fig.height=9,fig.align='center'} -->
+<!-- everyother_xlabels=levels(usagematrix.melt$timestamp) -->
+<!-- everyother_xlabels[seq(2,length(everyother_xlabels),2)]="" -->
+<!-- ggplotly(ggplot(usagematrix.melt,aes(x=timestamp,y=ncpus_in_use,fill=username))+ -->
+<!--            geom_bar(stat = "identity", col="white")+ -->
+<!--            scale_fill_manual(values=sample(col_vector,200,replace=TRUE))+theme_classic()+ -->
+<!--            theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+ -->
+<!--            scale_x_discrete(labels = everyother_xlabels) -->
+<!--            ) -->
+<!-- ``` -->
 ##Daily
 ```{r test}
 everyother_xlabels=levels(as.factor(daily_usage$date))
