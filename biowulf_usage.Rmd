@@ -122,7 +122,7 @@ daily_usage$mean_ncpus_used=as.numeric(daily_usage$mean_ncpus_used)
 <!--            ) -->
 <!-- ``` -->
 ##Daily
-```{r test}
+```{r test, echo=FALSE,fig.width=15,fig.height=9,fig.align='center'}
 everyother_xlabels=levels(as.factor(daily_usage$date))
 everyother_xlabels[seq(2,length(everyother_xlabels),2)]=""
 ggplotly(ggplot(daily_usage,aes(x=date,y=mean_ncpus_used,fill=user))+
